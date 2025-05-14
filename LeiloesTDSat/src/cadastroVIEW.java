@@ -1,11 +1,12 @@
+
+import javax.swing.JOptionPane;
+
 public class cadastroVIEW extends javax.swing.JFrame {
 
-   
     public cadastroVIEW() {
         initComponents();
     }
 
-  
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -120,32 +121,61 @@ public class cadastroVIEW extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cadastroNomeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cadastroNomeActionPerformed
-        
-        
+
+
     }//GEN-LAST:event_cadastroNomeActionPerformed
 
     private void btnCadastrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastrarActionPerformed
-        ProdutosDTO produto = new ProdutosDTO();
         String nome = cadastroNome.getText();
-        String valor = cadastroValor.getText();
-        String status = "A Venda";
+        String valorStr = cadastroValor.getText();
+
+        if (nome.trim().isEmpty() || valorStr.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Os campos Nome e Valor não podem estar vazios.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        ProdutosDTO produto = new ProdutosDTO();
         produto.setNome(nome);
-        produto.setValor(Integer.parseInt(valor));
-        produto.setStatus(status);
-        
-        ProdutosDAO produtodao = new ProdutosDAO();
-        produtodao.cadastrarProduto(produto);
-        
+        produto.setStatus("A Venda");
+
+        try {
+            int valor = Integer.parseInt(valorStr);
+            if (valor < 0) {
+                JOptionPane.showMessageDialog(this, "O valor do produto não pode ser negativo.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            produto.setValor(valor);
+
+            ProdutosDAO produtodao = new ProdutosDAO();
+            boolean cadastrou = produtodao.cadastrarProduto(produto);
+
+            // MENSAGEM DE FEEDBACK
+            if (cadastrou) {
+                // Exibe mensagem de sucesso
+                JOptionPane.showMessageDialog(this, "Produto cadastrado com sucesso!", "Cadastro Realizado", JOptionPane.INFORMATION_MESSAGE);
+
+                // Limpar campos após o cadastro
+                cadastroNome.setText("");
+                cadastroValor.setText("");
+                cadastroNome.requestFocus(); // Coloca o foco de volta no campo nome
+            } else {
+                // Exibe mensagem de falha
+                JOptionPane.showMessageDialog(this, "Falha ao cadastrar produto.\nConsulte o console para mais detalhes do erro do banco de dados.", "Erro no Cadastro", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "O valor do produto deve ser um número inteiro válido.", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
+        }
+
     }//GEN-LAST:event_btnCadastrarActionPerformed
 
     private void btnProdutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProdutosActionPerformed
-        listagemVIEW listagem = new listagemVIEW(); 
+        listagemVIEW listagem = new listagemVIEW();
         listagem.setVisible(true);
     }//GEN-LAST:event_btnProdutosActionPerformed
 
-   
     public static void main(String args[]) {
-  
+
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new cadastroVIEW().setVisible(true);
