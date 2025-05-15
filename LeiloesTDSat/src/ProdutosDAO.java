@@ -59,8 +59,51 @@ public class ProdutosDAO {
     
     public ArrayList<ProdutosDTO> listarProdutos(){
         
-          return new ArrayList<>();
-    }   
-        
-}
+          ArrayList<ProdutosDTO> listaDeProdutos = new ArrayList<>();
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        String sql = "SELECT id, nome, valor, status FROM produtos"; // Seleciona todas as colunas
 
+        try {
+            // 1. Obter a conexão
+            conn = conectaDAO.conectar();
+
+            // 2. Preparar a instrução SQL
+            stmt = conn.prepareStatement(sql);
+
+            // 3. Executar a consulta
+            rs = stmt.executeQuery();
+
+            // 4. Iterar sobre os resultados
+            while (rs.next()) {
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(rs.getInt("id"));
+                produto.setNome(rs.getString("nome"));
+                produto.setValor(rs.getInt("valor")); // No seu DTO está Integer, no banco é INT
+                produto.setStatus(rs.getString("status"));
+
+                listaDeProdutos.add(produto);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar produtos do banco de dados: " + e.getMessage());
+            // e.printStackTrace(); // Descomente para depuração se necessário
+            // Em caso de erro, uma lista vazia será retornada, o que é um comportamento aceitável
+            // para a interface gráfica não quebrar, mas o erro será logado no console.
+        } finally {
+            // 5. Fechar ResultSet, PreparedStatement e Connection
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao fechar ResultSet ou PreparedStatement: " + e.getMessage());
+            }
+            conectaDAO.desconectar(conn);
+        }
+        return listaDeProdutos;
+    }
+}
