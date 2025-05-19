@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.sql.SQLException;
+import javax.swing.JOptionPane;
 
 
 public class ProdutosDAO {
@@ -11,6 +12,7 @@ public class ProdutosDAO {
     Connection conn;
     PreparedStatement prep;
     ResultSet resultset;
+     ArrayList<ProdutosDTO> listagem = new ArrayList<>();
      
         //Cadastra um novo produto no banco de dados.
         public boolean cadastrarProduto(ProdutosDTO produto) {
@@ -54,9 +56,6 @@ public class ProdutosDAO {
         }
     }
 
-        
-     
-    
     public ArrayList<ProdutosDTO> listarProdutos(){
         
           ArrayList<ProdutosDTO> listaDeProdutos = new ArrayList<>();
@@ -106,4 +105,48 @@ public class ProdutosDAO {
         }
         return listaDeProdutos;
     }
+    
+    /**
+     * Atualiza o status de um produto para "Vendido" no banco de dados.
+     * @param id O ID do produto a ser vendido.
+     * @return true se a atualização for bem-sucedida, false caso contrário.
+     */
+    public boolean venderProduto(int id) {
+        boolean sucesso = false;
+        String sql = "UPDATE produtos SET status = ? WHERE id = ?"; // Assumindo que a tabela se chama 'produtos' e a coluna de status é 'status'
+
+        try {
+            conn = conectaDAO.conectar(); // Obtém a conexão do conectaDAO [cite: 42]
+            prep = conn.prepareStatement(sql);
+            prep.setString(1, "Vendido"); // Define o novo status
+            prep.setInt(2, id);           // Define o ID do produto a ser atualizado
+
+            int linhasAfetadas = prep.executeUpdate();
+
+            if (linhasAfetadas > 0) {
+                System.out.println("Produto com ID " + id + " atualizado para Vendido.");
+                sucesso = true;
+            } else {
+                System.out.println("Nenhum produto encontrado com o ID " + id + " ou o status já era Vendido.");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao vender produto: " + e.getMessage());
+            e.printStackTrace(); // Importante para depuração
+            JOptionPane.showMessageDialog(null, "Erro ao vender o produto: " + e.getMessage());
+        } finally {
+            // Bloco finally para garantir que os recursos sejam fechados
+            if (prep != null) {
+                try {
+                    prep.close();
+                } catch (SQLException e) {
+                    System.err.println("Erro ao fechar PreparedStatement: " + e.getMessage());
+                }
+            }
+            conectaDAO.desconectar(conn); // Fecha a conexão utilizando o método da sua classe conectaDAO [cite: 52]
+        }
+        return sucesso;
+    }
+        
 }
+
