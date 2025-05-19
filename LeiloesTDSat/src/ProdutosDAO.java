@@ -147,6 +147,55 @@ public class ProdutosDAO {
         }
         return sucesso;
     }
-        
+  
+  /**
+     * Lista todos os produtos com o status "Vendido" do banco de dados.
+     * @return ArrayList<ProdutosDTO> contendo os produtos vendidos.
+     */
+    public ArrayList<ProdutosDTO> listarProdutosVendidos() {
+        ArrayList<ProdutosDTO> produtosVendidos = new ArrayList<>();
+        String sql = "SELECT * FROM produtos WHERE status = ?"; // Assumindo que a tabela se chama 'produtos' e a coluna de status é 'status'
+
+        try {
+            conn = conectaDAO.conectar(); // Obtém a conexão do conectaDAO
+            prep = conn.prepareStatement(sql);
+            prep.setString(1, "Vendido"); // Define o status a ser buscado
+
+            resultset = prep.executeQuery();
+
+            while (resultset.next()) {
+                ProdutosDTO produto = new ProdutosDTO();
+                produto.setId(resultset.getInt("id"));
+                produto.setNome(resultset.getString("nome"));
+                produto.setValor(resultset.getInt("valor"));
+                produto.setStatus(resultset.getString("status"));
+                produtosVendidos.add(produto);
+            }
+            System.out.println(produtosVendidos.size() + " produtos vendidos encontrados.");
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar produtos vendidos: " + e.getMessage());
+            e.printStackTrace(); // Importante para depuração
+            JOptionPane.showMessageDialog(null, "Erro ao listar produtos vendidos: " + e.getMessage());
+        } finally {
+            // Bloco finally para garantir que os recursos sejam fechados
+            if (resultset != null) {
+                try {
+                    resultset.close();
+                } catch (SQLException e) {
+                    System.err.println("Erro ao fechar ResultSet: " + e.getMessage());
+                }
+            }
+            if (prep != null) {
+                try {
+                    prep.close();
+                } catch (SQLException e) {
+                    System.err.println("Erro ao fechar PreparedStatement: " + e.getMessage());
+                }
+            }
+            conectaDAO.desconectar(conn); // Fecha a conexão
+        }
+        return produtosVendidos;
+    }  
 }
 
