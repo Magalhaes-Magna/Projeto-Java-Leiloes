@@ -120,17 +120,36 @@ public class listagemVIEW extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnVenderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVenderActionPerformed
-        String id = id_produto_venda.getText();
+      String idStr = id_produto_venda.getText();
+    if (idStr.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Por favor, insira o ID do produto para vender.", "Erro", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
+    try {
+        int id = Integer.parseInt(idStr);
         ProdutosDAO produtosdao = new ProdutosDAO();
+        
+        boolean sucesso = produtosdao.venderProduto(id); // Chama o método atualizado
 
-        //produtosdao.venderProduto(Integer.parseInt(id));
-        listarProdutos();
+        if (sucesso) {
+            JOptionPane.showMessageDialog(this, "Produto vendido com sucesso!");
+            id_produto_venda.setText(""); // Limpa o campo de ID
+            listarProdutos(); // Atualiza a tabela de produtos na interface
+        } else {
+            JOptionPane.showMessageDialog(this, "Falha ao vender o produto. Verifique o ID ou se o produto já foi vendido.", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(this, "ID do produto inválido. Por favor, insira um número.", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_btnVenderActionPerformed
 
     private void btnVendasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVendasActionPerformed
-        //vendasVIEW vendas = new vendasVIEW(); 
-        //vendas.setVisible(true);
+ // Cria e exibe o diálogo de vendas
+    // 'this' refere-se à instância atual de listagemVIEW, que será o 'owner' do diálogo
+    VendasDialog vendasDialog = new VendasDialog(this, true); // true para modal
+    vendasDialog.setVisible(true);
     }//GEN-LAST:event_btnVendasActionPerformed
 
     private void btnVoltarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoltarActionPerformed
